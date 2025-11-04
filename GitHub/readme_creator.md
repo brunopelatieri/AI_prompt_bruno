@@ -1,4 +1,5 @@
 :date: 09/10/2025
+:alien: AI ChatGPT
 
 Seguindo os modelos README anteriores, faça um README sobre meu robô de cripto moedas para Binance que automatiza estratégias de negociação na plataforma da Binance, executando ordens de compra e venda de cripto ativos 24 horas por dia com base em regras pré-definidas. 
 Esse robô é o modo de colocar em prática os estudos teórico realizado sobre cripto moeda, block chain, smart contract, web3, dapp e tudo que está relacionado com que há de mais moderno no mundo da tecnologia e o futuro: criptos moedas, blockchain e smart contract.

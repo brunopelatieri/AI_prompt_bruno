@@ -1,9 +1,11 @@
 :date: 17/10/2025
+:alien: AI ChatGPT
 
 Sou o Bruno Pelatieri Goulart faça um pesquisa no meu github: https://github.com/brunopelatieri, linkedin: https://www.linkedin.com/in/bruno-pelatieri-goulart/, meu blog: https://brunogoulart.com.br/, instagram: https://www.instagram.com/brunopelatieri/
 Faça um texto profissional sobre mim e coloque que também crio prompt para IA e automações de n8n para setor de atendimento IA para vendo de crédito para empresa Phyonext: https://phyonex.com/
 Faça uma busca profunda para colher as informações de modo a criar um texto profissional que me projete para tecnologia do futuro de um profissional que vem desde 2005 desenvolvendo tecnologias e software opensource
 
+# Result
 :alien:Resulte:
 Olá! Com base nas informações fornecidas sobre você no GitHub do brunopelatieri e nas soluções apresentadas pela Phyonext, elaborei um texto profissional alinhado à sua trajetória e ao posicionamento de tecnologia de futuro, destacando sua experiência desde meados dos anos 2000, atuação full stack, blockchain, modernização de legados, criação de prompts de IA e automações com n8n voltadas ao setor de atendimento e vendas de crédito com IA.
 
