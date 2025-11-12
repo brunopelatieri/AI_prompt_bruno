@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IA Empresarial | Otimize seus Processos</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-chat: #ffffff;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --border-color: #dee2e6;
+            --user-msg-bg: #0d6efd;
+            --user-msg-text: #ffffff;
+            --assistant-msg-bg: #f8f9fa;
+            --assistant-msg-text: #212529;
+            --input-bg: #ffffff;
+            --header-bg: #ffffff;
+            --shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-chat: #1a1a1a;
+            --text-primary: #e9ecef;
+            --text-secondary: #adb5bd;
+            --border-color: #404040;
+            --user-msg-bg: #0d6efd;
+            --user-msg-text: #ffffff;
+            --assistant-msg-bg: #2d2d2d;
+            --assistant-msg-text: #e9ecef;
+            --input-bg: #2d2d2d;
+            --header-bg: #212529;
+            --shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            background: var(--bg-chat);
+            transition: background 0.3s ease;
+        }
+
+        .chat-header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-icon {
+            font-size: 1.75rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .header-title {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .header-subtitle {
+            margin: 0;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: var(--border-color);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .theme-toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        [data-theme="dark"] .theme-toggle {
+            background: #0d6efd;
+        }
+
+        [data-theme="dark"] .theme-toggle-slider {
+            transform: translateX(30px);
+        }
+
+        .btn-clear {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-clear:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            padding: 2rem;
+            gap: 1.5rem;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
+
+        .empty-state-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .empty-state-description {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .empty-state-cta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .suggestion-pill {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .suggestion-pill:hover {
+            background: var(--user-msg-bg);
+            color: white;
+            border-color: var(--user-msg-bg);
+            transform: translateY(-2px);
+        }
+
+        .message {
+            display: flex;
+            gap: 0.75rem;
+            max-width: 85%;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-user {
+            align-self: flex-end;
+            margin-left: auto;
+            flex-direction: row-reverse;
+        }
+
+        .message-assistant {
+            align-self: flex-start;
+            margin-right: auto;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .message-user .message-avatar {
+            background: var(--user-msg-bg);
+            color: white;
+        }
+
+        .message-assistant .message-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message-content {
+            background: var(--assistant-msg-bg);
+            color: var(--assistant-msg-text);
+            padding: 0.875rem 1.125rem;
+            border-radius: 18px;
+            line-height: 1.6;
+            word-wrap: break-word;
+            transition: all 0.3s ease;
+        }
+
+        .message-user .message-content {
+            background: var(--user-msg-bg);
+            color: var(--user-msg-text);
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-assistant .message-content {
+            border-bottom-left-radius: 4px;
+        }
+
+        .loading-message {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.875rem 1.125rem;
+        }
+
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        .chat-input-area {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--input-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 24px;
+            display: flex;
+            align-items: flex-end;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--user-msg-bg);
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
+        }
+
+        .chat-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+            resize: none;
+            max-height: 150px;
+            line-height: 1.5;
+            font-family: inherit;
+        }
+
+        .chat-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .input-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .btn-action {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+
+        .btn-action:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .btn-action.recording {
+            background: #dc3545;
+            color: white;
+            animation: pulse-red 1.5s infinite;
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .btn-send {
+            background: var(--user-msg-bg);
+            color: white;
+        }
+
+        .btn-send:hover {
+            background: #0b5ed7;
+            transform: scale(1.05);
+        }
+
+        .btn-send:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .alert-custom {
+            position: fixed;
+            top: 5rem;
+            right: 1.5rem;
+            z-index: 1000;
+            min-width: 300px;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .chat-header {
+                padding: 1rem;
+            }
+
+            .header-title {
+                font-size: 1rem;
+            }
+
+            .header-subtitle {
+                font-size: 0.75rem;
+            }
+
+            .chat-messages {
+                padding: 1rem;
+            }
+
+            .message {
+                max-width: 90%;
+            }
+
+            .empty-state-title {
+                font-size: 1.5rem;
+            }
+
+            .empty-state-description {
+                font-size: 1rem;
+            }
+
+            .chat-input-area {
+                padding: 1rem;
+            }
+
+            .btn-clear {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.75rem;
+            }
+
+            .alert-custom {
+                right: 1rem;
+                left: 1rem;
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="header-content">
+                <div class="header-icon">🚀</div>
+                <div>
+                    <h1 class="header-title">Assistente de Otimização Empresarial</h1>
+                    <p class="header-subtitle">Descubra como a IA pode revolucionar seus processos</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn-clear" id="clearChatBtn">🗑️ Limpar</button>
+                <div class="theme-toggle" id="themeToggle">
+                    <div class="theme-toggle-slider" id="themeSlider">🌙</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="empty-state">
+                <div class="empty-state-icon">💡</div>
+                <h2 class="empty-state-title">Transforme sua Empresa com Inteligência Artificial</h2>
+                <p class="empty-state-description">
+                    Identifique processos ineficientes, reduza custos operacionais e multiplique sua produtividade. 
+                    Nosso assistente inteligente analisa seu negócio e revela oportunidades de automação que você ainda não explorou.
+                </p>
+                <div class="empty-state-cta">
+                    <div class="suggestion-pill" data-suggestion="Quais processos você pode automatizar no meu setor?">
+                        🤖 Processos Automatizáveis
+                    </div>
+                    <div class="suggestion-pill" data-suggestion="Como reduzir custos operacionais com IA?">
+                        💰 Redução de Custos
+                    </div>
+                    <div class="suggestion-pill" data-suggestion="Como aumentar a produtividade da minha equipe?">
+                        📈 Aumentar Produtividade
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-input-area">
+            <div class="input-wrapper">
+                <textarea 
+                    class="chat-input" 
+                    id="messageInput" 
+                    placeholder="Descreva um desafio do seu negócio e descubra como a IA pode resolver..."
+                    rows="1"
+                ></textarea>
+                <div class="input-actions">
+                    <button class="btn-action" id="audioBtn" title="Gravar áudio">🎤</button>
+                    <button class="btn-action btn-send" id="sendBtn" title="Enviar">➤</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const CHAT_WEBHOOK = 'https://webhook.chatdevendas.online/webhook/iaphyo3451';
+        const SUPABASE_URL = 'https://seu-projeto.supabase.co';
+        const SUPABASE_KEY = 'sua-anon-key-aqui';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        let sessionId = localStorage.getItem('chat_session_id') || generateSessionId();
+        let isRecording = false;
+        let mediaRecorder = null;
+        let audioChunks = [];
+
+        function generateSessionId() {
+            const id = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('chat_session_id', id);
+            return id;
+        }
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            $('#themeSlider').text(theme === 'light' ? '🌙' : '☀️');
+        }
+
+        async function saveMessageToCache(message, isUser) {
+            try {
+                const { error } = await supabase
+                    .from('chat_messages')
+                    .insert({
+                        session_id: sessionId,
+                        message: message,
+                        is_user: isUser,
+                        timestamp: new Date().toISOString()
+                    });
+                if (error) throw error;
+            } catch (error) {
+                console.error('Erro ao salvar mensagem:', error);
+            }
+        }
+
+        async function loadMessagesFromCache() {
+            try {
+                const { data, error } = await supabase
+                    .from('chat_messages')
+                    .select('*')
+                    .eq('session_id', sessionId)
+                    .order('timestamp', { ascending: true });
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    $('.empty-state').remove();
+                    data.forEach(msg => {
+                        addMessageToUI(msg.message, msg.is_user, false);
+                    });
+                }
+            } catch (error) {
+                console.error('Erro ao carregar mensagens:', error);
+            }
+        }
+
+        async function clearChatCache() {
+            try {
+                const { error } = await supabase
+                    .from('chat_messages')
+                    .delete()
+                    .eq('session_id', sessionId);
+
+                if (error) throw error;
+                
+                sessionId = generateSessionId();
+                
+                $('#chatMessages').html(`
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💡</div>
+                        <h2 class="empty-state-title">Transforme sua Empresa com Inteligência Artificial</h2>
+                        <p class="empty-state-description">
+                            Identifique processos ineficientes, reduza custos operacionais e multiplique sua produtividade. 
+                            Nosso assistente inteligente analisa seu negócio e revela oportunidades de automação que você ainda não explorou.
+                        </p>
+                        <div class="empty-state-cta">
+                            <div class="suggestion-pill" data-suggestion="Quais processos você pode automatizar no meu setor?">
+                                🤖 Processos Automatizáveis
+                            </div>
+                            <div class="suggestion-pill" data-suggestion="Como reduzir custos operacionais com IA?">
+                                💰 Redução de Custos
+                            </div>
+                            <div class="suggestion-pill" data-suggestion="Como aumentar a produtividade da minha equipe?">
+                                📈 Aumentar Produtividade
+                            </div>
+                        </div>
+                    </div>
+                `);
+                
+                showAlert('Conversa limpa com sucesso!', 'success');
+            } catch (error) {
+                console.error('Erro ao limpar cache:', error);
+                showAlert('Erro ao limpar conversa.', 'danger');
+            }
+        }
+
+        function addMessageToUI(content, isUser = false, saveToCache = true) {
+            $('.empty-state').remove();
+
+            const avatarIcon = isUser ? '👤' : '🤖';
+            const messageClass = isUser ? 'message-user' : 'message-assistant';
+            
+            const messageHtml = `
+                <div class="message ${messageClass}">
+                    <div class="message-avatar">${avatarIcon}</div>
+                    <div class="message-content">${escapeHtml(content)}</div>
+                </div>
+            `;
+            
+            $('#chatMessages').append(messageHtml);
+            scrollToBottom();
+
+            if (saveToCache) {
+                saveMessageToCache(content, isUser);
+            }
+        }
+
+        function showLoading() {
+            const loadingHtml = `
+                <div class="message message-assistant" id="loadingMessage">
+                    <div class="message-avatar">🤖</div>
+                    <div class="message-content">
+                        <div class="loading-message">
+                            <div class="loading-dot"></div>
+                            <div class="loading-dot"></div>
+                            <div class="loading-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('#chatMessages').append(loadingHtml);
+            scrollToBottom();
+        }
+
+        function removeLoading() {
+            $('#loadingMessage').remove();
+        }
+
+        function showAlert(message, type = 'info') {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show alert-custom" role="alert">
+                    ${escapeHtml(message)}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            $('body').append(alertHtml);
+
+            setTimeout(() => {
+                $('.alert-custom').fadeOut(400, function() {
+                    $(this).remove();
+                });
+            }, 4000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function scrollToBottom() {
+            const chatArea = $('#chatMessages')[0];
+            setTimeout(() => {
+                chatArea.scrollTop = chatArea.scrollHeight;
+            }, 100);
+        }
+
+        async function sendMessage() {
+            const input = $('#messageInput');
+            const message = input.val().trim();
+            
+            if (!message) return;
+
+            addMessageToUI(message, true);
+            input.val('').css('height', 'auto');
+
+            input.prop('disabled', true);
+            $('#sendBtn').prop('disabled', true);
+
+            showLoading();
+
+            try {
+                const response = await $.ajax({
+                    url: CHAT_WEBHOOK,
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        type: 'text',
+                        message: message,
+                        session_id: sessionId,
+                        timestamp: new Date().toISOString()
+                    }),
+                    timeout: 30000
+                });
+
+                removeLoading();
+
+                const responseText = response?.response || response?.message || 
+                                   (typeof response === 'string' ? response : 'Resposta recebida!');
+                
+                addMessageToUI(responseText, false);
+
+            } catch (error) {
+                removeLoading();
+                console.error('Erro:', error);
+                showAlert('Erro ao enviar mensagem. Tente novamente.', 'danger');
+            } finally {
+                input.prop('disabled', false);
+                $('#sendBtn').prop('disabled', false);
+                input.focus();
+            }
+        }
+
+        async function toggleRecording() {
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        await sendAudio(audioBlob);
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    $('#audioBtn').addClass('recording').text('⏹️');
+                    addMessageToUI('🎤 Gravando áudio...', true);
+
+                } catch (error) {
+                    console.error('Erro ao acessar microfone:', error);
+                    showAlert('Não foi possível acessar o microfone.', 'warning');
+                }
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                $('#audioBtn').removeClass('recording').text('🎤');
+            }
+        }
+
+        async function sendAudio(audioBlob) {
+            showLoading();
+            $('#sendBtn').prop('disabled', true);
+            $('#audioBtn').prop('disabled', true);
+
+            try {
+                const reader = new FileReader();
+                reader.readAsDataURL(audioBlob);
+                
+                reader.onloadend = async function() {
+                    const base64Audio = reader.result.split(',')[1];
+                    
+                    const response = await $.ajax({
+                        url: CHAT_WEBHOOK,
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            type: 'audio',
+                            audio: base64Audio,
+                            format: 'webm',
+                            session_id: sessionId,
+                            timestamp: new Date().toISOString()
+                        }),
+                        timeout: 60000
+                    });
+
+                    removeLoading();
+
+                    const responseText = response?.response || response?.message || 
+                                       (typeof response === 'string' ? response : 'Áudio processado!');
+                    
+                    addMessageToUI(responseText, false);
+                };
+
+            } catch (error) {
+                removeLoading();
+                console.error('Erro ao enviar áudio:', error);
+                showAlert('Erro ao processar áudio.', 'danger');
+            } finally {
+                $('#sendBtn').prop('disabled', false);
+                $('#audioBtn').prop('disabled', false);
+            }
+        }
+
+        $(document).ready(function() {
+            initTheme();
+            loadMessagesFromCache();
+            $('#messageInput').focus();
+        });
+
+        $('#messageInput').on('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+
+        $('#messageInput').on('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        $('#sendBtn').on('click', sendMessage);
+        $('#audioBtn').on('click', toggleRecording);
+        $('#themeToggle').on('click', toggleTheme);
+
+        $('#clearChatBtn').on('click', function() {
+            if (confirm('Tem certeza que deseja limpar toda a conversa?')) {
+                clearChatCache();
+            }
+        });
+
+        $(document).on('click', '.suggestion-pill', function() {
+            const suggestion = $(this).data('suggestion');
+            $('#messageInput').val(suggestion);
+            sendMessage();
+        });
+    </script>
+</body>
+</html>
