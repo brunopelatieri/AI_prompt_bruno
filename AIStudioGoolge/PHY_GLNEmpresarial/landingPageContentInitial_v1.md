@@ -4,6 +4,19 @@
 
 ### Adjust
 
+Substituir a url da imagem por essa url: https://gln.phyonext.com/001_img/socios_gln_version2.png.
+Posicionar o bloco "Performance Gestão de Escala" em cima da imagem para position bottom.
+Adicionar textarea no formulário.
+Aumentar o font-size H3 para 1.8rem.
+
+Adicione um sub-título no section formulário com um texto que foque na importância do preenchimento do formulário para o entendimento do cenário para um diagnóstico preciso das dores do empresário que busca elevar sua empresa ao próximo nível. 
+
+diminuir o padding top da section hero e nos dispositivos mobile colocar a imagem acima do texto.
+
+Refaça a section do formulário seguindo essa estrutura enviada mas mantendo o estilo landing page.
+
+---------------------------------------------------------
+
 Colocar uma secção antes do formulário com o título: "Como funciona o primeiro contato com a GLN"
 Teremos 6 tópicos:
 1 - Título: "Cadastro simples"
@@ -78,6 +91,4 @@ Segue abaixo as perguntas e resposta:
 
 --------------------------------------------------------------------------------------------------------------
 
-Crie um arquivo html com o nome "index_complete.html" com os todos os caminhos das dependências necessárias para a landing page seja renderizada com sucesso em qualquer lugar que o arquivo for acionado.
-O objetivo e copiar o código html gerado e colar em um bloco de código html no wordpress.
 
