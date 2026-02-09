@@ -46,9 +46,6 @@ Excluir o efeito do menu de fixo na versão desktop
 
 No menu de navegação fixo no mobile, manter o background azul
 
-Colocar o espaço entre o menu e o topo da section hero de 25px no mobile.
-Colocar o espaço entre o botão "Ver Solução" e o carousel de 25px no mobile.
-
 ---------------------------------------------------------
 
 Colocar uma secção antes do formulário com o título: "Como funciona o primeiro contato com a GLN"
