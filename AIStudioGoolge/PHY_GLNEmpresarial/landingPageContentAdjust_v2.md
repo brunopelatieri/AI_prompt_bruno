@@ -1,8 +1,16 @@
-:date: 03/02/2026
+:date: 09/02/2026
 :alien: AI Gemini Studio Google
 
 
 ### Adjust
+
+Trocar as do carousels pelas seguintes imagens:
+  - https://gln.phyonext.com/001_img/gln_empresarial_socios_kevin_oseas_1_v1.png
+  - https://gln.phyonext.com/001_img/gln_empresarial_socios_kevin_oseas_2_v1.png
+  - https://gln.phyonext.com/001_img/gln_empresarial_socios_kevin_oseas_3_v1.png
+
+
+---------------------------------------------------------------
 
 Substituir a url da imagem por essa url: https://gln.phyonext.com/001_img/socios_gln_version2.png.
 Posicionar o bloco "Performance Gestão de Escala" em cima da imagem para position bottom.
