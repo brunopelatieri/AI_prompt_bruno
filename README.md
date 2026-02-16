@@ -1,6 +1,67 @@
-# 🏗️ |Padronização :: Arquitetura do Prompt DiretorIA
+# 🏗️ XML Prompting
 
-Utilizamos uma hierarquia XML para separar as instruções de sistema, as regras de negócio brasileiras e os mecanismos de tratamento de erro.
+Este guia estabelece a arquitetura de prompts para garantir máxima assertividade nos modelos **Claude 4.5, Gemini 3 Pro e GPT-5**, focando na integração entre lógica de sistema e realidade de negócios brasileira.
+
+---
+
+## 🎯 A Regra de Pareto (80/20) para Prompts
+Para obter **80% de precisão** com **20% de esforço** de depuração, a estrutura deve seguir o princípio da separação idiomática:
+1.  **Instruções de Sistema (Lógica):** Sempre em **Inglês** (onde os modelos têm maior benchmark de raciocínio).
+2.  **Regras e Contexto (Negócio):** Sempre em **Português (pt-BR)** (para capturar nuances culturais e locais).
+
+---
+
+## 🏗️ Hierarquia de Tags XML
+
+A estrutura abaixo deve ser utilizada como template base para todos os nós de IA no **n8n**.
+
+### 1. `<system_instructions lang="en">`
+* **Finalidade:** Define o "hardware" mental da IA.
+* **O que incluir:** Role (Persona), restrições técnicas, formato de saída (JSON/XML) e comportamento proibido.
+* **Por que:** Reduz "alucinações" de formato e garante que a IA siga ordens de segurança.
+
+### 2. `<brazilian_context_rules lang="pt-BR">`
+* **Finalidade:** Define as "leis" do negócio no Brasil.
+* **O que incluir:** Regras de moeda (R$), fuso horário, leis (LGPD) e diretrizes de tom de voz regional.
+* **Exemplo:** "Nunca utilize termos de Portugal como 'telemóvel' ou 'casa de banho'."
+
+### 3. `<brazilian_context lang="pt-BR">`
+* **Finalidade:** O "combustível" dinâmico da automação.
+* **O que incluir:** Variáveis vindas do **Supabase** ou Webhooks (ex: nome do cliente, histórico, texto extraído via OCR).
+
+---
+
+## 📋 Template para Copiar e Colar
+
+```xml
+<prompt_architecture>
+  <system_instructions lang="en">
+    You are a specialized agent for the project 'DiretorIA App'.
+    Your task is to analyze the user data and provide a structured output.
+    Constraint: Response must be strictly in valid JSON format.
+    Tone: Professional and helpful.
+  </system_instructions>
+
+  <brazilian_context_rules lang="pt-BR">
+    - Localização: Brasil.
+    - Moeda: Real (R$).
+    - Tom de Voz: Cordial e direto ao ponto.
+    - Especialidade: Automações n8n e gestão de dados.
+  </brazilian_context_rules>
+
+  <brazilian_context lang="pt-BR">
+    <user_input>{{ $json.pergunta }}</user_input>
+    <database_record>{{ $json.dados_supabase }}</database_record>
+  </brazilian_context>
+
+  <execution_parameters>
+    Please process the <brazilian_context> following the <brazilian_context_rules> 
+    and output the result in the format requested in <system_instructions>.
+  </execution_parameters>
+</prompt>
+
+```
+---
 
 ## 📋 Tags e Lógica de Processamento
 
