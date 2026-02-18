@@ -1,6 +1,6 @@
 # 🤖 Prompt Engineering & Versioning Guide (SemVer 1.0.0)
 
-Este documento define o padrão de versionamento e a arquitetura de prompts para o ecossistema do **DiretorIA App**. O objetivo é garantir que cada instrução enviada ao modelo de IA seja rastreável, testável e segura para produção.
+Este documento define o padrão de versionamento e a arquitetura de prompts para um ecossistema. O objetivo é garantir que cada instrução enviada ao modelo de IA seja rastreável, testável e segura para produção.
 
 ---
 
@@ -53,9 +53,6 @@ Utilizamos **XML** para delimitar contextos, pois os modelos modernos (como Clau
 </prompt_definition>
 
 ```
-# 🤖 Estratégia de Versionamento de Prompts (Prompt Ops)
-
-Este documento define o padrão de versionamento e a arquitetura de governança para os prompts do ecossistema **DiretorIA App**. O objetivo é garantir **reprodutibilidade**, **rastreabilidade** e **estabilidade** em produção.
 
 ---
 
@@ -74,3 +71,48 @@ A estrutura de pastas reflete a maturidade e o histórico de cada prompt:
   └── README.md                # Este arquivo de documentação
 
 ```
+
+---
+
+## ⚙️ 4. Fluxo de Integração (Stack Tecnológica)
+
+O versionamento é espelhado entre o código e o banco de dados para automação via **n8n**, garantindo que a IA utilize sempre a instrução homologada:
+
+1.  **GitHub**: *Single Source of Truth* (Fonte da Verdade). O prompt é editado, revisado e versionado aqui.
+2.  **Supabase**: Tabela `prompts_registry` armazena o histórico de versões e o status de ativação (`is_active`).
+3.  **n8n**: O workflow consome a API do Supabase buscando o prompt por `slug` e filtrando por `version` ou `is_active: true`.
+4.  **Evolution API**: Recebe o prompt final processado pelo n8n para realizar a interação com o usuário final.
+
+---
+
+## 📊 5. Estrutura da Tabela (Supabase)
+
+Para gerenciar o ciclo de vida dos prompts diretamente no banco de dados, utilize a seguinte estrutura de colunas:
+
+| Coluna | Tipo | Descrição |
+| :--- | :--- | :--- |
+| `slug` | `text` | Identificador único do prompt (ex: `atendimento_vendas`). |
+| `version` | `varchar` | String seguindo o padrão SemVer (ex: `1.0.0`). |
+| `content` | `text` | O corpo completo do prompt (instruções, contexto e regras). |
+| `is_active` | `boolean` | Flag booleana para indicar qual versão o n8n deve consumir por padrão. |
+| `created_at` | `timestamp` | Registro automático de data/hora da criação da versão. |
+
+---
+
+## 🚀 6. Comandos de Versionamento (Git)
+
+Sempre que uma versão estável for atingida no repositório, utilize **Tags** para facilitar o rastreamento e eventuais *rollbacks*:
+
+```bash
+# 1. Criar tag da versão estável localmente
+git tag -a v1.0.0 -m "Lançamento inicial estável - App"
+
+# 2. Enviar a tag para o repositório remoto (GitHub)
+git push origin v1.0.0
+
+# 3. Listar todas as versões de prompts existentes
+git tag -l
+
+```
+
+---
